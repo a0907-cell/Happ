@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>2026 星空金色刮刮樂 ✨</title>
+    <style>
+        /* 背景改為深邃星空漸層色 */
+        body { 
+            background: radial-gradient(circle at center, #1b2735 0%, #090a0f 100%); 
+            text-align: center; 
+            font-family: "PingFang TC", "Microsoft JhengHei", sans-serif; 
+            margin: 0; 
+            padding: 20px; 
+            height: 100vh;
+            color: white;
+        }
+        .container { 
+            position: relative; 
+            width: 320px; 
+            height: 480px; 
+            margin: 10px auto; 
+            border: 5px solid #ffd700; /* 金色邊框 */
+            border-radius: 20px; 
+            background: #fff; 
+            overflow: hidden; 
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.3); 
+        }
+        .content { 
+            width: 100%; 
+            height: 100%; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+            background: #fff; 
+        }
+        #reward-text { 
+            font-size: 28px; 
+            font-weight: bold; 
+            color: #d4af37; /* 獎項文字用金色 */
+            padding: 25px; 
+            line-height: 1.6; 
+            white-space: pre-wrap; 
+        }
+        canvas { 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            cursor: crosshair; 
+            touch-action: none; 
+            z-index: 5; 
+        }
+        h2 { color: #ffd700; text-shadow: 0 0 10px rgba(255,215,0,0.5); margin-bottom: 5px; }
+        p { color: #aaa; font-size: 14px; }
+        
+        /* 調大後的按鈕 */
+        .btn-reset { 
+            margin-top: 25px; 
+            padding: 15px 40px; 
+            font-size: 20px; 
+            font-weight: bold;
+            background: linear-gradient(45deg, #ffd700, #b8860b); 
+            color: #333; 
+            border: none; 
+            border-radius: 50px; 
+            cursor: pointer; 
+            display: none; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            transition: transform 0.2s;
+        }
+        .btn-reset:active { transform: scale(0.95); }
+    </style>
+</head>
+<body>
+
+    <h2>✨ 2026 星空幸運刮刮樂 ✨</h2>
+    <p>刮開這片金色，看看星空給你的驚喜</p>
+
+    <div class="container" id="js-container">
+        <div class="content">
+            <div id="reward-text"></div>
+        </div>
+        <canvas id="scratch-canvas"></canvas>
+    </div>
+    <button class="btn-reset" id="reset-btn" onclick="location.reload()">再刮一張，好運再來！</button>
+
+    <script>
+        const canvas = document.getElementById('scratch-canvas');
+        const ctx = canvas.getContext('2d');
+        const container = document.getElementById('js-container');
+        
+        const normalRewards = [
+            "看Popoo 影片一次", "聽王aden一首歌", "唱王aden一首歌", "寒心", 
+            "吃一根香蕉", "你是popoo", "我的聖誕禮物勒", "我的生日禮物勒", 
+            "阿桑內褲🩲1件", "你越來越桑了", "是阿桑吧", 
+            "祝你2026越來越popoo", "祝你2026越來越桑", "祝你10000塊都給我"
+        ];
+
+        // 調整為 25% 的機率出現沒中
+        function getRandomReward() {
+            const rand = Math.random();
+            if (rand < 0.25) {
+                return "沒有中獎🥲\n再來一次";
+            } else {
+                return normalRewards[Math.floor(Math.random() * normalRewards.length)];
+            }
+        }
+
+        document.getElementById('reward-text').innerText = getRandomReward();
+
+        function init() {
+            canvas.width = container.offsetWidth;
+            canvas.height = container.offsetHeight;
+            
+            // 建立金色漸層遮罩
+            const goldGrad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+            goldGrad.addColorStop(0, '#d4af37');
+            goldGrad.addColorStop(0.5, '#ffd700');
+            goldGrad.addColorStop(1, '#b8860b');
+            
+            ctx.fillStyle = goldGrad;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // 遮罩上的裝飾文字
+            ctx.fillStyle = 'rgba(0,0,0,0.3)';
+            ctx.font = 'bold 24px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('用財氣刮開驚喜 ✨', canvas.width/2, canvas.height/2);
+        }
+
+        function scratch(e) {
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            const x = clientX - rect.left;
+            const y = clientY - rect.top;
+
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.beginPath();
+            ctx.arc(x, y, 35, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 只要有刮動，按鈕就會出現
+            document.getElementById('reset-btn').style.display = 'inline-block';
+        }
+
+        canvas.addEventListener('touchstart', scratch);
+        canvas.addEventListener('touchmove', scratch);
+        canvas.addEventListener('mousedown', () => {
+            canvas.addEventListener('mousemove', scratch);
+        });
+        window.addEventListener('mouseup', () => {
+            canvas.removeEventListener('mousemove', scratch);
+        });
+
+        window.onload = init;
+    </script>
+</body>
+</html>
